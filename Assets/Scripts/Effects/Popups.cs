@@ -8,8 +8,11 @@ using Levels;
 
 public class Popups : MonoBehaviour
 {
-    [SerializeField] Button restartButton;
+    [SerializeField] GameObject restartButton;
+    [SerializeField] Transform restartButtonPosition;
     [SerializeField] TextMeshProUGUI questText;
+
+    Button restartBtn;
 
     private void Start()
     {
@@ -18,16 +21,12 @@ public class Popups : MonoBehaviour
         GridBuilder.QuestHide += HideQuestText;
     }
 
-    void ShowQuestText(string text)
+    async void ShowQuestText(string text)
     {
         questText.text = "Choose: " + text;
         questText.gameObject.SetActive(true);
 
-        var color = questText.color;
-        var tempColor = color;
-        tempColor.a = 1;
-
-        questText.DOColor(tempColor, 1f);
+        await questText.DOFade(1, 1.5f).AsyncWaitForCompletion();
     }
 
     void HideQuestText()
@@ -37,18 +36,23 @@ public class Popups : MonoBehaviour
 
     public void ShowRestartButton(Action callback)
     {
-        restartButton.gameObject.SetActive(true);
-        restartButton.transform.localScale = new Vector3(0,0,0);
+        restartBtn = Instantiate(restartButton, restartButtonPosition).GetComponent<Button>();
 
-        restartButton.onClick.AddListener(() => callback());
-        restartButton.onClick.AddListener(() => RestartButton());
+        restartBtn.transform.localScale = new Vector3(0,0,0);
 
-        restartButton.transform.DOScale(new Vector3(1,1,1), 1).SetEase(Ease.InBounce);
+        restartBtn.onClick.AddListener(() => callback());
+        restartBtn.onClick.AddListener(() => RestartButton());
+
+        restartBtn.transform.DOScale(new Vector3(1,1,1), 1).SetEase(Ease.InBounce);
+        restartBtn.interactable = true;
     }
 
-    async void RestartButton()
+    void RestartButton()
     {
-        await restartButton.transform.DOScale(new Vector3(0, 0, 0), 1).SetEase(Ease.InBounce).AsyncWaitForCompletion();
-        restartButton.gameObject.SetActive(false);
+        restartBtn.interactable = false;
+        restartBtn.transform.DOScale(new Vector3(0, 0, 0), 1).SetEase(Ease.InBounce);
+
+        Destroy(restartBtn.gameObject);
+        restartBtn = null;
     }
 }

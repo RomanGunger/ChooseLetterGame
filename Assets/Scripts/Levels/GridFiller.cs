@@ -4,6 +4,7 @@ using DG.Tweening;
 using GameQuest;
 using GridItems;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Levels
 {
@@ -11,9 +12,19 @@ namespace Levels
     {
         List<GameItemScriptableObject> gameItemScriptableObjects = new List<GameItemScriptableObject>();
 
+        bool RandomBool()
+        {
+            System.Random random = new System.Random();
+            int randomIndex = random.Next(0, 2);
+            return randomIndex == 0;
+        }
+
         public void LoadObjects()
         {
-            var loadedObjects = Resources.LoadAll("GameItems", typeof(GameItemScriptableObject));
+            gameItemScriptableObjects.Clear();
+
+            var loadedObjects = RandomBool() ? Resources.LoadAll("Letters", typeof(GameItemScriptableObject))
+                : Resources.LoadAll("Numbers", typeof(GameItemScriptableObject));
 
             foreach (GameItemScriptableObject item in loadedObjects)
             {
@@ -37,6 +48,12 @@ namespace Levels
                 int randomIndex = random.Next(0, tempItems.Count);
                 item.id = tempItems[randomIndex].Id;
                 item.image.sprite = tempItems[randomIndex].Sprite;
+
+                float aspectRatio = tempItems[randomIndex].Sprite.bounds.size.x /
+                    tempItems[randomIndex].Sprite.bounds.size.y;
+
+                item.image.GetComponent<AspectRatioFitter>().aspectRatio = aspectRatio;
+
                 tempItems.RemoveAt(randomIndex);
 
 
@@ -51,6 +68,18 @@ namespace Levels
                 }
                 else
                     trans.DOScale(1, 0f).SetEase(Ease.OutBounce);
+            }
+        }
+
+        public void RemoveItem(string id)
+        {
+            foreach (var item in gameItemScriptableObjects)
+            {
+                if (item.Id == id)
+                {
+                    gameItemScriptableObjects.Remove(item);
+                    break;
+                }
             }
         }
     }

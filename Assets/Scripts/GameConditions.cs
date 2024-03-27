@@ -79,7 +79,6 @@ public class GameConditions : MonoBehaviour
     {
         Shaker shaker = new Shaker(imageTransform);
         shaker.DoShakeAction(0.7f, 7f);
-        Debug.Log("Mistake");
     }
 
     private void OnDestroy()
