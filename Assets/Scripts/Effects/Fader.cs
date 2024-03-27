@@ -1,18 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using DG.Tweening;
+using System.Threading.Tasks;
 
 public class Fader : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] Image faderImage;
 
-    // Update is called once per frame
-    void Update()
+    async public Task Fade(float value, float duration)
     {
-        
+        //faderImage.gameObject.SetActive(true);
+        await faderImage.DOFade(value, duration).AsyncWaitForCompletion();
+        //faderImage.gameObject.SetActive(false);
     }
 }

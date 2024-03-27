@@ -6,11 +6,14 @@ using UnityEngine;
 
 public class GameConditions : MonoBehaviour
 {
-    public static event Action LevelPassed;
+    public static event Action<Action> LastLevelPassed;
+    public static event Action<string> QuestShow;
 
     [SerializeField] GameObject winEffectPrefab;
     [SerializeField] LevelsProgression levelsProgression;
     [SerializeField] LevelBuilder levelBuilder;
+    [SerializeField] Fader fader;
+    [SerializeField] GameObject raycastBlocker;
 
     int currentLevel = 0;
 
@@ -23,17 +26,26 @@ public class GameConditions : MonoBehaviour
 
     public async void NewGame()
     {
+        raycastBlocker.SetActive(true);
+
+        await fader.Fade(0, 2f);
         await levelBuilder.Build(true, levelsProgression.GetCollumnsCount(currentLevel)
-            ,levelsProgression.GetItemsCount(currentLevel));
+            , levelsProgression.GetItemsCount(currentLevel));
+
+        raycastBlocker.SetActive(false);
     }
 
     public async void NextLevel()
     {
+        await levelBuilder.Build(false, levelsProgression.GetCollumnsCount(currentLevel)
+        , levelsProgression.GetItemsCount(currentLevel));
 
+        raycastBlocker.SetActive(false);
     }
 
     async public void Win(Transform imageTransform)
     {
+        raycastBlocker.SetActive(true);
         Shaker shaker = new Shaker(imageTransform);
         shaker.DoShakeAction(0.5f, 5f);
 
@@ -42,7 +54,25 @@ public class GameConditions : MonoBehaviour
         currentLevel++;
 
         await Task.Delay(2000);
-        LevelPassed?.Invoke();
+
+        if (currentLevel >= levelsProgression.GetLevelsCount())
+        {
+            await fader.Fade(0.99f, 2f);
+
+            LastLevelPassed?.Invoke(RestartButton);
+        }
+        else
+        {
+            levelBuilder.DestroyLevel();
+            NextLevel();
+        }
+    }
+
+    private void RestartButton()
+    {
+        levelBuilder.DestroyLevel();
+        currentLevel = 0;
+        NewGame();
     }
 
     public void Mistake(Transform imageTransform)
@@ -50,5 +80,11 @@ public class GameConditions : MonoBehaviour
         Shaker shaker = new Shaker(imageTransform);
         shaker.DoShakeAction(0.7f, 7f);
         Debug.Log("Mistake");
+    }
+
+    private void OnDestroy()
+    {
+        GridItem.Right -= Win;
+        GridItem.Wrong -= Mistake;
     }
 }

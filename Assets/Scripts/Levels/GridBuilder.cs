@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DG.Tweening;
@@ -9,6 +10,8 @@ namespace Levels
 {
     public class GridBuilder : MonoBehaviour
     {
+        public static event Action QuestHide;
+
         [SerializeField] GridLayoutGroup gridLayout;
         [SerializeField] GameObject gridItemObject;
 
@@ -43,7 +46,7 @@ namespace Levels
             }
 
             gridItems.Clear();
-            //fader.HideQuestText();
+            QuestHide?.Invoke();
         }
     }
 }

@@ -23,6 +23,12 @@ namespace Levels
             Quest quest = new Quest();
             quest.SetQuest(gridItems);
         }
+
+        public void DestroyLevel()
+        {
+            gridBuilder.DestroyLevel(gridItems);
+        }
+
     }
 }
 
